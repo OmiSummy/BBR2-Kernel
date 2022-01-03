@@ -1,0 +1,23 @@
+name: bbr2-config
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+    - name: Something
+      run: |
+        sudo apt update
+        sudo apt install kernel-package
+        git clone --depth=1 -o google-bbr -b v2alpha https://github.com/google/bbr.git
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+    - uses: actions/upload-artifact@v2
+      with:
+        name: my-artifact
+        path: |
+          bbr/.config
