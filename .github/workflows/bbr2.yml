@@ -1,0 +1,33 @@
+name: bbr2
+
+on:
+  push:
+    tags:
+      - "20*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Something
+      run: |
+        sudo apt update
+        sudo apt install kernel-package
+        git clone --depth=1 -o google-bbr -b v2alpha https://github.com/google/bbr.git
+        mv .config bbr/.config
+        cd bbr
+        scripts/config --disable MODULE_SIG
+        scripts/config --disable DEBUG_INFO
+        scripts/config --disable SYSTEM_TRUSTED_KEYS
+        scripts/config --disable SYSTEM_REVOCATION_KEYS
+        make deb-pkg -j$(nproc)
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          *.deb
